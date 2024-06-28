@@ -17,6 +17,9 @@ def set_full_window_length():
     )
 
 # Streamlit app
+st.set_page_config(layout="wide")  # Use the wide layout
+
+# Streamlit app
 st.title('QSB Summary Analysis')
 
 # File uploader
