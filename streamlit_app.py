@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Streamlit app
-st.title('Trade Summary Analysis')
+st.title('QSB Summary Analysis')
 
 # File uploader
 uploaded_file = st.file_uploader("Upload your Excel file", type=["xlsx"])
