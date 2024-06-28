@@ -16,6 +16,20 @@ def set_full_window_length():
         unsafe_allow_html=True
     )
 
+# Function to apply CSS styling for alternate row colors
+def set_alternate_row_color():
+    st.markdown(
+        """
+        <style>
+        /* Add alternating row color to dataframes */
+        .dataframe tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 # Streamlit app
 st.set_page_config(layout="wide")  # Use the wide layout
 
@@ -58,6 +72,12 @@ if uploaded_file is not None:
             filtered = filtered.xs(complex_symbol_id, level='COMPLEX_SYMBOL_ID')
 
         return filtered
+
+    # Apply CSS styling for full window length
+    set_full_window_length()
+
+    # Apply CSS styling for alternate row colors
+    set_alternate_row_color()
 
     filtered_summary_trades = filter_data(summary_trades, selected_ecco_subtype, selected_complex_symbol_id)
     filtered_volume_summary = filter_data(volume_summary, selected_ecco_subtype, selected_complex_symbol_id)
