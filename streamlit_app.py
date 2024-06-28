@@ -16,16 +16,20 @@ if uploaded_file is not None:
     total_volume_summary = pd.read_excel(uploaded_file, sheet_name="Total_Volume_Summary", index_col=[0])
     volume_per_mm = pd.read_excel(uploaded_file, sheet_name="Volume_Per_MM_Summary", index_col=[0,1,2,3,4])
 
+    # Extract unique values for filters
+    ecco_subtypes = summary_trades.index.get_level_values('ECCO_SUBTYPE').unique()
+    complex_symbol_ids = summary_trades.index.get_level_values('COMPLEX_SYMBOL_ID').unique()
+
     # Sidebar filters
     st.sidebar.header('Filters')
-    ecco_subtype = st.sidebar.selectbox('Select ECCO_SUBTYPE', sorted(summary_trades['ECCO_SUBTYPE'].unique()))
-    complex_symbol_id = st.sidebar.selectbox('Select COMPLEX_SYMBOL_ID (optional)', ['All'] + sorted(summary_trades['COMPLEX_SYMBOL_ID'].unique()))
+    ecco_subtype = st.sidebar.selectbox('Select ECCO_SUBTYPE', sorted(ecco_subtypes))
+    complex_symbol_id = st.sidebar.selectbox('Select COMPLEX_SYMBOL_ID (optional)', ['All'] + sorted(complex_symbol_ids))
 
     # Filter data based on sidebar input
-    filtered_data = summary_trades[summary_trades['ECCO_SUBTYPE'] == ecco_subtype]
+    filtered_data = summary_trades.loc[(slice(None), ecco_subtype), :]
 
     if complex_symbol_id != 'All':
-        filtered_data = filtered_data[filtered_data['COMPLEX_SYMBOL_ID'] == complex_symbol_id]
+        filtered_data = filtered_data.loc[(slice(None), ecco_subtype, complex_symbol_id), :]
 
     # Display the filtered data
     st.subheader('Summary Trades')
