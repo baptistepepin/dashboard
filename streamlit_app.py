@@ -17,34 +17,49 @@ if uploaded_file is not None:
     volume_per_mm = pd.read_excel(uploaded_file, sheet_name="Volume_Per_MM_Summary", index_col=[0,1,2,3,4])
 
     # Extract unique values for filters
-    ecco_subtypes = summary_trades.index.get_level_values('ECCO_SUBTYPE').unique()
-    complex_symbol_ids = summary_trades.index.get_level_values('COMPLEX_SYMBOL_ID').unique()
+    ecco_subtypes = ['All'] + list(summary_trades.index.get_level_values('ECCO_SUBTYPE').unique())
 
     # Sidebar filters
     st.sidebar.header('Filters')
-    ecco_subtype = st.sidebar.selectbox('Select ECCO_SUBTYPE', sorted(ecco_subtypes))
-    complex_symbol_id = st.sidebar.selectbox('Select COMPLEX_SYMBOL_ID (optional)', ['All'] + sorted(complex_symbol_ids))
+    selected_ecco_subtype = st.sidebar.selectbox('Select ECCO_SUBTYPE', ecco_subtypes)
+
+    if selected_ecco_subtype == 'All':
+        complex_symbol_ids = ['All'] + list(summary_trades.index.get_level_values('COMPLEX_SYMBOL_ID').unique())
+    else:
+        complex_symbol_ids = ['All'] + list(summary_trades.xs(selected_ecco_subtype, level='ECCO_SUBTYPE').index.get_level_values('COMPLEX_SYMBOL_ID').unique())
+
+    selected_complex_symbol_id = st.sidebar.selectbox('Select COMPLEX_SYMBOL_ID (optional)', complex_symbol_ids)
 
     # Filter data based on sidebar input
-    filtered_data = summary_trades.loc[(slice(None), ecco_subtype), :]
+    def filter_data(df, ecco_subtype, complex_symbol_id):
+        if ecco_subtype == 'All':
+            filtered = df
+        else:
+            filtered = df.xs(ecco_subtype, level='ECCO_SUBTYPE')
 
-    if complex_symbol_id != 'All':
-        filtered_data = filtered_data.loc[(slice(None), ecco_subtype, complex_symbol_id), :]
+        if complex_symbol_id != 'All':
+            filtered = filtered.xs(complex_symbol_id, level='COMPLEX_SYMBOL_ID')
+
+        return filtered
+
+    filtered_summary_trades = filter_data(summary_trades, selected_ecco_subtype, selected_complex_symbol_id)
+    filtered_volume_summary = filter_data(volume_summary, selected_ecco_subtype, selected_complex_symbol_id)
+    filtered_volume_per_mm = filter_data(volume_per_mm, selected_ecco_subtype, selected_complex_symbol_id)
 
     # Display the filtered data
     st.subheader('Summary Trades')
-    st.dataframe(filtered_data)
+    st.dataframe(filtered_summary_trades)
 
     st.subheader('Total Summary Trades by Trading Date')
     st.dataframe(total_summary_trades)
 
     st.subheader('Volume Summary')
-    st.dataframe(volume_summary)
+    st.dataframe(filtered_volume_summary)
 
     st.subheader('Total Volume Summary by Trading Date')
     st.dataframe(total_volume_summary)
 
     st.subheader('Volume per Market Maker')
-    st.dataframe(volume_per_mm)
+    st.dataframe(filtered_volume_per_mm)
 else:
     st.info("Please upload an Excel file to proceed.")
