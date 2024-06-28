@@ -2,6 +2,20 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
+# Function to apply CSS styling for full window length
+def set_full_window_length():
+    st.markdown(
+        """
+        <style>
+        .dataframe {
+            height: calc(100vh - 80px) !important;
+            overflow-y: scroll !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 # Streamlit app
 st.title('QSB Summary Analysis')
 
@@ -46,20 +60,23 @@ if uploaded_file is not None:
     filtered_volume_summary = filter_data(volume_summary, selected_ecco_subtype, selected_complex_symbol_id)
     filtered_volume_per_mm = filter_data(volume_per_mm, selected_ecco_subtype, selected_complex_symbol_id)
 
+    # Apply CSS styling for full window length
+    set_full_window_length()
+
     # Display the filtered data
     st.subheader('Summary Trades')
-    st.dataframe(filtered_summary_trades)
+    st.dataframe(filtered_summary_trades, height=600)
 
     st.subheader('Total Summary Trades by Trading Date')
-    st.dataframe(total_summary_trades)
+    st.dataframe(total_summary_trades, height=600)
 
     st.subheader('Volume Summary')
-    st.dataframe(filtered_volume_summary)
+    st.dataframe(filtered_volume_summary, height=600)
 
     st.subheader('Total Volume Summary by Trading Date')
-    st.dataframe(total_volume_summary)
+    st.dataframe(total_volume_summary, height=600)
 
     st.subheader('Volume per Market Maker')
-    st.dataframe(filtered_volume_per_mm)
+    st.dataframe(filtered_volume_per_mm, height=600)
 else:
     st.info("Please upload an Excel file to proceed.")
